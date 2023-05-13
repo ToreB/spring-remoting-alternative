@@ -7,4 +7,6 @@ public interface RemoteService {
     String bye();
 
     void doSomething(String param1, boolean param2);
+
+    DataObject exchange(DataObject dataObject);
 }

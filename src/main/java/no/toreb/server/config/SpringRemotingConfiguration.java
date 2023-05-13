@@ -26,7 +26,7 @@ public class SpringRemotingConfiguration {
 
         @Override
         public Object invoke(final MethodInvocation invocation) {
-            return time(invocation.getMethod().getName(), () -> {
+            return time("remoting " + invocation.getMethod().getName(), () -> {
                 try {
                     return invocation.proceed();
                 } catch (final Throwable e) {

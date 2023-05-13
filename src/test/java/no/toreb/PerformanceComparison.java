@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.toreb.client.service.DynamicServiceFactory;
 import no.toreb.client.service.SpringRemotingServiceFactory;
 import no.toreb.client.service.StaticService;
+import no.toreb.common.DataObject;
+import no.toreb.common.DataObject2;
 import no.toreb.common.RemoteService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
@@ -11,6 +13,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +31,7 @@ class PerformanceComparison implements CommandLineRunner {
     }
 
     @Override
-    public void run(final String... args) throws Exception {
+    public void run(final String... args) {
         final String baseUrl = "http://localhost:8080";
         final RemoteService staticService = new StaticService(baseUrl);
         final DynamicServiceFactory dynamicServiceFactory = new DynamicServiceFactory(baseUrl);
@@ -38,6 +41,16 @@ class PerformanceComparison implements CommandLineRunner {
         final RemoteService springRemotingService = springRemotingServiceFactory.create(RemoteService.class,
                                                                                         "/remoting/remoteService");
 
+        final DataObject dataObject = DataObject.builder()
+                                                .field1("value1")
+                                                .field2(37)
+                                                .field3(true)
+                                                .field4(DataObject2.builder()
+                                                                   .field1("value2")
+                                                                   .strings(List.of("str1", "str2"))
+                                                                   .build())
+                                                .build();
+
         final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         final int iterations = 10000;
@@ -46,17 +59,18 @@ class PerformanceComparison implements CommandLineRunner {
         final Map<String, CompletableFuture<Duration>> executions = new HashMap<>();
         for (int i = 0; i < 2; i++) {
             final CompletableFuture<Duration> future1 =
-                    CompletableFuture.supplyAsync(() -> time(staticService::hello, iterations),
+                    CompletableFuture.supplyAsync(() -> time(() -> staticService.exchange(dataObject), iterations),
                                                   executorService);
             executions.put("Static " + i, future1);
 
             final CompletableFuture<Duration> future2 =
-                    CompletableFuture.supplyAsync(() -> time(dynamicService::hello, iterations),
+                    CompletableFuture.supplyAsync(() -> time(() -> dynamicService.exchange(dataObject), iterations),
                                                   executorService);
             executions.put("Dynamic " + i, future2);
 
             final CompletableFuture<Duration> future3 =
-                    CompletableFuture.supplyAsync(() -> time(springRemotingService::hello, iterations),
+                    CompletableFuture.supplyAsync(() -> time(() -> springRemotingService.exchange(dataObject),
+                                                             iterations),
                                                   executorService);
             executions.put("Remoting " + i, future3);
         }
