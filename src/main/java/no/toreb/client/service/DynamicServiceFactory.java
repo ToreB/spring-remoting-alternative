@@ -20,7 +20,7 @@ public class DynamicServiceFactory {
     private final RemoteServiceInterceptor interceptor;
 
     public DynamicServiceFactory(final String baseUrl) {
-        this.interceptor = new RemoteServiceInterceptor(baseUrl);
+        this.interceptor = new RemoteServiceInterceptor(baseUrl + "/dynamic");
     }
 
     public <T> T create(final Class<T> type) {
@@ -41,7 +41,7 @@ public class DynamicServiceFactory {
     public static class RemoteServiceInterceptor extends AbstractRemoteService {
 
         public RemoteServiceInterceptor(final String baseUrl) {
-            super(baseUrl + "/dynamic");
+            super(baseUrl);
         }
 
         @RuntimeType
