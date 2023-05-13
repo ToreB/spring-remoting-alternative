@@ -23,7 +23,7 @@ Creates an HTTP API by using Spring MVC's functional endpoint configuration, for
 ### DynamicServiceFactory
 
 Factory that creates a proxy for a remote service using Byte buddy, by specifying the remote interface. Each method of 
-the proxy calls the corresponding remote HTTP endpoint, RPC style. Details for invoking the remote method is added to 
+the proxy calls the corresponding remote HTTP endpoint, RPC / RMI style. Details for invoking the remote method is added to 
 the request body as a serialized Java-object, by using Java Object Serialization.
 
 ```java
