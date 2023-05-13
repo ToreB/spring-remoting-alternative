@@ -1,6 +1,6 @@
 package no.toreb.client.service;
 
-import no.toreb.common.MethodRequest;
+import no.toreb.common.RemoteMethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +29,13 @@ class AbstractRemoteService {
         this.httpClient = HttpClient.newBuilder().build();
     }
 
-    protected <T> T callRemote(final MethodRequest<T> methodRequest) {
-        return time(methodRequest.getMethodName(), () -> {
+    protected <T> T callRemote(final RemoteMethodInvocation<T> methodInvocation) {
+        return time(methodInvocation.getMethodName(), () -> {
             try {
-                final byte[] bodyBytes = serialize(methodRequest);
+                final byte[] bodyBytes = serialize(methodInvocation);
                 final HttpRequest httpRequest =
                         HttpRequest.newBuilder()
-                                   .uri(new URI(baseUrl + "/" + methodRequest.getMethodName()))
+                                   .uri(new URI(baseUrl + "/" + methodInvocation.getMethodName()))
                                    .POST(BodyPublishers.ofByteArray(bodyBytes))
                                    .build();
 
@@ -57,11 +57,11 @@ class AbstractRemoteService {
         }
     }
 
-    private byte[] serialize(final MethodRequest<?> methodRequest) throws Exception {
+    private byte[] serialize(final RemoteMethodInvocation<?> remoteMethodInvocation) throws Exception {
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
 
-        objectOutputStream.writeObject(methodRequest);
+        objectOutputStream.writeObject(remoteMethodInvocation);
         objectOutputStream.flush();
         objectOutputStream.close();
 

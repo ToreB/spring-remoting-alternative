@@ -1,6 +1,6 @@
 package no.toreb.server.config;
 
-import no.toreb.common.MethodRequest;
+import no.toreb.common.RemoteMethodInvocation;
 import no.toreb.common.RemoteService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +25,9 @@ class StaticApiConfiguration {
                 .POST("/static/doSomething",
                       request -> time(request.path(), () -> {
                           try {
-                              final MethodRequest<Void> methodRequest = deserializeBody(request, Void.class);
-                              final Object[] methodArguments = methodRequest.getMethodArguments();
+                              final RemoteMethodInvocation<Void> methodInvocation = deserializeBody(request,
+                                                                                                    Void.class);
+                              final Object[] methodArguments = methodInvocation.getMethodArguments();
                               service.doSomething((String) methodArguments[0], (Boolean) methodArguments[1]);
                               return ServerResponse.ok().build();
                           } catch (final Exception e) {

@@ -5,7 +5,7 @@ import lombok.Value;
 import java.io.Serializable;
 
 @Value
-public class MethodRequest<T> implements Serializable {
+public class RemoteMethodInvocation<T> implements Serializable {
 
     String methodName;
 

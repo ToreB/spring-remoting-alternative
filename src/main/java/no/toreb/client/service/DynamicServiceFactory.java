@@ -8,7 +8,7 @@ import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.matcher.ElementMatchers;
-import no.toreb.common.MethodRequest;
+import no.toreb.common.RemoteMethodInvocation;
 
 import java.lang.reflect.Method;
 
@@ -47,7 +47,7 @@ public class DynamicServiceFactory {
         @RuntimeType
         public Object intercept(@Origin final Method method,
                                 @AllArguments final Object[] args) {
-            return callRemote(new MethodRequest<>(method.getName(), method.getReturnType(), args));
+            return callRemote(new RemoteMethodInvocation<>(method.getName(), method.getReturnType(), args));
         }
     }
 }

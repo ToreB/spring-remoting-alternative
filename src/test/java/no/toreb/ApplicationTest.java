@@ -30,8 +30,8 @@ class ApplicationTest {
 
     @BeforeEach
     void setUp() {
-        final DynamicServiceFactory dynamicServiceFactory = new DynamicServiceFactory(getBaseUrl());
         staticService = new StaticService(getBaseUrl());
+        final DynamicServiceFactory dynamicServiceFactory = new DynamicServiceFactory(getBaseUrl());
         dynamicService = dynamicServiceFactory.create(RemoteService.class);
     }
 

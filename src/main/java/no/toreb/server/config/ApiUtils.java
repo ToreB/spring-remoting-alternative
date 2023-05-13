@@ -2,7 +2,7 @@ package no.toreb.server.config;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import no.toreb.common.MethodRequest;
+import no.toreb.common.RemoteMethodInvocation;
 import org.springframework.web.servlet.function.ServerRequest;
 
 import java.io.ByteArrayInputStream;
@@ -22,7 +22,7 @@ class ApiUtils {
         try {
             return supplier.get();
         } finally {
-            final Duration duration =  Duration.ofNanos(System.nanoTime() - start);
+            final Duration duration = Duration.ofNanos(System.nanoTime() - start);
             log.info("Server duration {}: {} ms", name, duration.toNanos() / 1_000_000.0);
         }
     }
@@ -42,17 +42,17 @@ class ApiUtils {
         return byteArrayOutputStream.toByteArray();
     }
 
-    static <T> MethodRequest<T> deserializeBody(final ServerRequest request,
-                                                final Class<T> responseType) throws Exception {
+    static <T> RemoteMethodInvocation<T> deserializeBody(final ServerRequest request,
+                                                         final Class<T> responseType) throws Exception {
         final byte[] body = request.body(byte[].class);
         if (body.length == 0) {
-            return new MethodRequest<>(null, responseType, new Object[0]);
+            return new RemoteMethodInvocation<>(null, responseType, new Object[0]);
         }
 
         final ByteArrayInputStream bais = new ByteArrayInputStream(body);
         final ObjectInputStream ois = new ObjectInputStream(bais);
         @SuppressWarnings("unchecked")
-        final MethodRequest<T> result = (MethodRequest<T>) ois.readObject();
+        final RemoteMethodInvocation<T> result = (RemoteMethodInvocation<T>) ois.readObject();
         ois.close();
         return result;
     }

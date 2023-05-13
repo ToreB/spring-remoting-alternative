@@ -1,6 +1,6 @@
 package no.toreb.server.config;
 
-import no.toreb.common.MethodRequest;
+import no.toreb.common.RemoteMethodInvocation;
 import no.toreb.common.RemoteService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,8 +41,8 @@ class DynamicApiConfiguration {
     static HandlerFunction<ServerResponse> handle(final Method method, final RemoteService service) {
         return request -> time(request.path(), () -> {
             try {
-                final MethodRequest<?> methodRequest = deserializeBody(request, method.getReturnType());
-                final Object invokeResult = method.invoke(service, methodRequest.getMethodArguments());
+                final RemoteMethodInvocation<?> methodInvocation = deserializeBody(request, method.getReturnType());
+                final Object invokeResult = method.invoke(service, methodInvocation.getMethodArguments());
                 final BodyBuilder response = ServerResponse.ok();
                 if (invokeResult != null) {
                     return response.body(serialize(invokeResult));
