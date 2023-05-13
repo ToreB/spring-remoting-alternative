@@ -2,6 +2,7 @@ package no.toreb;
 
 import lombok.extern.slf4j.Slf4j;
 import no.toreb.client.service.DynamicServiceFactory;
+import no.toreb.client.service.SpringRemotingServiceFactory;
 import no.toreb.client.service.StaticService;
 import no.toreb.common.RemoteService;
 import no.toreb.server.Application;
@@ -20,6 +21,7 @@ class ApplicationTest {
 
     private RemoteService staticService;
     private RemoteService dynamicService;
+    private RemoteService springRemotingService;
 
     @LocalServerPort
     private int port;
@@ -33,6 +35,9 @@ class ApplicationTest {
         staticService = new StaticService(getBaseUrl());
         final DynamicServiceFactory dynamicServiceFactory = new DynamicServiceFactory(getBaseUrl());
         dynamicService = dynamicServiceFactory.create(RemoteService.class);
+        final SpringRemotingServiceFactory springRemotingServiceFactory =
+                new SpringRemotingServiceFactory(getBaseUrl());
+        springRemotingService = springRemotingServiceFactory.create(RemoteService.class, "/remoting/remoteService");
     }
 
     @Test
@@ -45,11 +50,17 @@ class ApplicationTest {
         final String dynamicBye = dynamicService.bye();
         dynamicService.doSomething("value2", false);
 
+        final String remotingHello = springRemotingService.hello();
+        final String remotingBye = springRemotingService.bye();
+        springRemotingService.doSomething("value3", true);
+
         assertThat(staticHello)
                 .isEqualTo(dynamicHello)
+                .isEqualTo(remotingHello)
                 .isEqualTo("hello from remote service");
         assertThat(staticBye)
                 .isEqualTo(dynamicBye)
+                .isEqualTo(remotingBye)
                 .isEqualTo("bye from remote service");
     }
 }

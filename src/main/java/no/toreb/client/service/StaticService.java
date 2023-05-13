@@ -2,10 +2,13 @@ package no.toreb.client.service;
 
 import no.toreb.common.RemoteMethodInvocation;
 import no.toreb.common.RemoteService;
-import org.springframework.stereotype.Service;
 
-@Service
 public class StaticService extends AbstractRemoteService implements RemoteService {
+
+    private final RemoteMethodInvocation<String> helloMethodInvocation =
+            new RemoteMethodInvocation<>("hello", String.class, new Object[0]);
+    private final RemoteMethodInvocation<String> byeMethodInvocation =
+            new RemoteMethodInvocation<>("bye", String.class, new Object[0]);
 
     public StaticService(final String baseUrl) {
         super(baseUrl + "/static");
@@ -13,12 +16,12 @@ public class StaticService extends AbstractRemoteService implements RemoteServic
 
     @Override
     public String hello() {
-        return callRemote(new RemoteMethodInvocation<>("hello", String.class, new Object[0]));
+        return callRemote(helloMethodInvocation);
     }
 
     @Override
     public String bye() {
-        return callRemote(new RemoteMethodInvocation<>("bye", String.class, new Object[0]));
+        return callRemote(byeMethodInvocation);
     }
 
     @Override
