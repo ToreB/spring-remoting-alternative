@@ -29,7 +29,7 @@ import static org.apache.http.conn.params.ConnPerRouteBean.DEFAULT_MAX_CONNECTIO
 
 /**
  * HTTP-client configured similar to {@link HttpComponentsHttpInvokerRequestExecutor}, to be able to compare
- * performance.
+ * performance with Spring Remoting.
  */
 @SuppressWarnings("deprecation")
 class AbstractRemoteService {
