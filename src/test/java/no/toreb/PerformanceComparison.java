@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
+// The application needs to run before running PerformanceComparison. Run the class Application first.
 @Slf4j
 class PerformanceComparison implements CommandLineRunner {
 
