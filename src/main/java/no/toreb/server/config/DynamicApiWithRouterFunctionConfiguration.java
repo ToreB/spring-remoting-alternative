@@ -36,13 +36,9 @@ class DynamicApiWithRouterFunctionConfiguration {
 
     static HandlerFunction<ServerResponse> handle(final Method method, final RemoteService service) {
         return request -> time(request.path(), () -> {
-            try {
-                final RemoteMethodInvocation<?> methodInvocation = deserializeBody(request);
-                final Object invokeResult = method.invoke(service, methodInvocation.getArguments());
-                return serverResponse(invokeResult);
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
+            final RemoteMethodInvocation<?> methodInvocation = deserializeBody(request);
+            final Object invokeResult = method.invoke(service, methodInvocation.getArguments());
+            return serverResponse(invokeResult);
         });
     }
 }

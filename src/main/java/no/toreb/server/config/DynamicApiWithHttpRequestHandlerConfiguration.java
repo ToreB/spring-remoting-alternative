@@ -29,22 +29,18 @@ public class DynamicApiWithHttpRequestHandlerConfiguration {
                                                        .stream()
                                                        .collect(Collectors.toMap(MethodKey::new, method -> method));
         return (request, response) -> time("/dynamic2/remoteService", () -> {
-            try {
-                final ServletInputStream bodyInputStream = request.getInputStream();
-                final RemoteMethodInvocation<?> methodInvocation = deserialize(bodyInputStream);
-                final Method method = methods.get(new MethodKey(methodInvocation.getMethodName(),
-                                                                methodInvocation.getParameterTypes()));
-                final Object invokeResult = method.invoke(service, methodInvocation.getArguments());
+            final ServletInputStream bodyInputStream = request.getInputStream();
+            final RemoteMethodInvocation<?> methodInvocation = deserialize(bodyInputStream);
+            final Method method = methods.get(new MethodKey(methodInvocation.getMethodName(),
+                                                            methodInvocation.getParameterTypes()));
+            final Object invokeResult = method.invoke(service, methodInvocation.getArguments());
 
-                response.setContentType(CONTENT_TYPE_VALUE);
-                response.setStatus(HttpServletResponse.SC_OK);
-                if (invokeResult != null) {
-                    serialize(invokeResult, response.getOutputStream());
-                }
-                return null;
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
+            response.setContentType(CONTENT_TYPE_VALUE);
+            response.setStatus(HttpServletResponse.SC_OK);
+            if (invokeResult != null) {
+                serialize(invokeResult, response.getOutputStream());
             }
+            return null;
         });
     }
 

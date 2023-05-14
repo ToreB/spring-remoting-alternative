@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.concurrent.Callable;
 
 @Slf4j
 @UtilityClass
@@ -28,10 +28,12 @@ class ApiUtils {
     private static final MediaType CONTENT_TYPE = new MediaType("application", "x-java-serialized-object");
     static final String CONTENT_TYPE_VALUE = "%s/%s".formatted(CONTENT_TYPE.getType(), CONTENT_TYPE.getSubtype());
 
-    static <T> T time(final String name, final Supplier<T> supplier) {
+    static <T> T time(final String name, final Callable<T> callable) {
         final long start = System.nanoTime();
         try {
-            return supplier.get();
+            return callable.call();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         } finally {
             final Duration duration = Duration.ofNanos(System.nanoTime() - start);
             log.info("Server duration {}: {} ms", name, duration.toNanos() / 1_000_000.0);

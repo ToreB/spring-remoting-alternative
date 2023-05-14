@@ -22,7 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.Duration;
-import java.util.function.Supplier;
+import java.util.concurrent.Callable;
 
 import static org.apache.http.conn.params.ConnManagerParams.DEFAULT_MAX_TOTAL_CONNECTIONS;
 import static org.apache.http.conn.params.ConnPerRouteBean.DEFAULT_MAX_CONNECTIONS_PER_ROUTE;
@@ -73,8 +73,6 @@ class AbstractRemoteService {
 
                 final HttpResponse response = httpClient.execute(httpRequest);
                 return deserialize(response.getEntity());
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
             } finally {
                 httpRequest.releaseConnection();
             }
@@ -85,10 +83,12 @@ class AbstractRemoteService {
         return "/" + methodInvocation.getMethodName();
     }
 
-    private <T> T time(final String name, final Supplier<T> supplier) {
+    private <T> T time(final String name, final Callable<T> callable) {
         final long start = System.nanoTime();
         try {
-            return supplier.get();
+            return callable.call();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         } finally {
             final Duration duration = Duration.ofNanos(System.nanoTime() - start);
             log.info("Client duration {}: {} ms", name, duration.toNanos() / 1_000_000.0);
