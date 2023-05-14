@@ -1,7 +1,8 @@
 package no.toreb;
 
 import lombok.extern.slf4j.Slf4j;
-import no.toreb.client.service.DynamicServiceFactory;
+import no.toreb.client.service.DynamicWithHttpRequestHandlerServiceFactory;
+import no.toreb.client.service.DynamicWithRouterFunctionServiceFactory;
 import no.toreb.client.service.SpringRemotingServiceFactory;
 import no.toreb.client.service.StaticService;
 import no.toreb.common.DataObject;
@@ -24,8 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ApplicationTest {
 
     private RemoteService staticService;
-    private RemoteService dynamicService;
+    private RemoteService dynamic1Service;
     private RemoteService springRemotingService;
+    private RemoteService dynamic2Service;
 
     @LocalServerPort
     private int port;
@@ -37,11 +39,15 @@ class ApplicationTest {
     @BeforeEach
     void setUp() {
         staticService = new StaticService(getBaseUrl());
-        final DynamicServiceFactory dynamicServiceFactory = new DynamicServiceFactory(getBaseUrl());
-        dynamicService = dynamicServiceFactory.create(RemoteService.class);
+        final DynamicWithRouterFunctionServiceFactory dynamicWithRouterFunctionServiceFactory =
+                new DynamicWithRouterFunctionServiceFactory(getBaseUrl());
+        dynamic1Service = dynamicWithRouterFunctionServiceFactory.create(RemoteService.class);
         final SpringRemotingServiceFactory springRemotingServiceFactory =
                 new SpringRemotingServiceFactory(getBaseUrl());
         springRemotingService = springRemotingServiceFactory.create(RemoteService.class, "/remoting/remoteService");
+        final DynamicWithHttpRequestHandlerServiceFactory dynamicWithHttpRequestHandlerServiceFactory =
+                new DynamicWithHttpRequestHandlerServiceFactory(getBaseUrl());
+        dynamic2Service = dynamicWithHttpRequestHandlerServiceFactory.create(RemoteService.class);
     }
 
     @Test
@@ -61,27 +67,35 @@ class ApplicationTest {
         staticService.doSomething("value1", true);
         final DataObject staticExchange = staticService.exchange(dataObject);
 
-        final String dynamicHello = dynamicService.hello();
-        final String dynamicBye = dynamicService.bye();
-        dynamicService.doSomething("value2", false);
-        final DataObject dynamicExchange = dynamicService.exchange(dataObject);
+        final String dynamic1Hello = dynamic1Service.hello();
+        final String dynamic1Bye = dynamic1Service.bye();
+        dynamic1Service.doSomething("value2", false);
+        final DataObject dynamic1Exchange = dynamic1Service.exchange(dataObject);
 
         final String remotingHello = springRemotingService.hello();
         final String remotingBye = springRemotingService.bye();
         springRemotingService.doSomething("value3", true);
         final DataObject remotingExchange = springRemotingService.exchange(dataObject);
 
+        final String dynamic2Hello = dynamic2Service.hello();
+        final String dynamic2Bye = dynamic2Service.bye();
+        dynamic2Service.doSomething("value2", false);
+        final DataObject dynamic2Exchange = dynamic2Service.exchange(dataObject);
+
         assertThat(staticHello)
-                .isEqualTo(dynamicHello)
+                .isEqualTo(dynamic1Hello)
                 .isEqualTo(remotingHello)
+                .isEqualTo(dynamic2Hello)
                 .isEqualTo("hello from remote service");
         assertThat(staticBye)
-                .isEqualTo(dynamicBye)
+                .isEqualTo(dynamic1Bye)
                 .isEqualTo(remotingBye)
+                .isEqualTo(dynamic2Bye)
                 .isEqualTo("bye from remote service");
         assertThat(staticExchange)
-                .isEqualTo(dynamicExchange)
+                .isEqualTo(dynamic1Exchange)
                 .isEqualTo(remotingExchange)
+                .isEqualTo(dynamic2Exchange)
                 .isEqualTo(dataObject.toBuilder().field3(false).build());
     }
 }

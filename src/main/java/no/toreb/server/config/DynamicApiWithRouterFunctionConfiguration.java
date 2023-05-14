@@ -8,27 +8,22 @@ import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions.Builder;
 import org.springframework.web.servlet.function.ServerResponse;
-import org.springframework.web.servlet.function.ServerResponse.BodyBuilder;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 
 import static no.toreb.server.config.ApiUtils.deserializeBody;
-import static no.toreb.server.config.ApiUtils.serialize;
+import static no.toreb.server.config.ApiUtils.getRemoteServiceMethods;
+import static no.toreb.server.config.ApiUtils.serverResponse;
 import static no.toreb.server.config.ApiUtils.time;
 import static org.springframework.web.servlet.function.RouterFunctions.route;
 
 @Configuration
-class DynamicApiConfiguration {
+class DynamicApiWithRouterFunctionConfiguration {
 
     @Bean
     RouterFunction<ServerResponse> dynamicApiRouterFunction(final RemoteService service) {
-        final List<Method> methods =
-                Arrays.stream(service.getClass().getMethods())
-                      .filter(method -> Arrays.stream(method.getDeclaringClass().getInterfaces())
-                                              .anyMatch(it -> it == RemoteService.class))
-                      .toList();
+        final List<Method> methods = getRemoteServiceMethods(service);
 
         final Builder route = route();
         methods.forEach(method -> {
@@ -41,14 +36,9 @@ class DynamicApiConfiguration {
     static HandlerFunction<ServerResponse> handle(final Method method, final RemoteService service) {
         return request -> time(request.path(), () -> {
             try {
-                final RemoteMethodInvocation<?> methodInvocation = deserializeBody(request, method.getReturnType());
+                final RemoteMethodInvocation<?> methodInvocation = deserializeBody(request);
                 final Object invokeResult = method.invoke(service, methodInvocation.getMethodArguments());
-                final BodyBuilder response = ServerResponse.ok();
-                if (invokeResult != null) {
-                    return response.body(serialize(invokeResult));
-                } else {
-                    return response.build();
-                }
+                return serverResponse(invokeResult);
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }

@@ -63,7 +63,7 @@ class AbstractRemoteService {
 
     protected <T> T callRemote(final RemoteMethodInvocation<T> methodInvocation) {
         return time(methodInvocation.getMethodName(), () -> {
-            final HttpPost httpRequest = new HttpPost(baseUrl + "/" + methodInvocation.getMethodName());
+            final HttpPost httpRequest = new HttpPost(baseUrl + getMethodPath(methodInvocation));
             try {
                 final byte[] bodyBytes = serialize(methodInvocation);
                 final ByteArrayEntity entity = new ByteArrayEntity(bodyBytes);
@@ -79,6 +79,10 @@ class AbstractRemoteService {
                 httpRequest.releaseConnection();
             }
         });
+    }
+
+    protected String getMethodPath(final RemoteMethodInvocation<?> methodInvocation) {
+        return "/" + methodInvocation.getMethodName();
     }
 
     private <T> T time(final String name, final Supplier<T> supplier) {

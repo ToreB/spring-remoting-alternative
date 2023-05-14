@@ -4,7 +4,7 @@ Simple alternative to Spring Remoting over HTTP.
 
 ## Server-side
 
-### DynamicApiConfiguration
+### DynamicApiWithRouterFunctionConfiguration
 
 Creates an HTTP API by using Spring MVC's functional endpoint configuration, where each method of a specified interface
 is mapped as a separate endpoint. The request handler for the endpoint calls the corresponding method on an
@@ -12,24 +12,40 @@ implementation of the interface, through reflection. The request body contains d
 body is a serialized Java-object, serialized with Java Object Serialization.  
 If the method returns a value, it will be sent back to the client as a serialized Java-object.
 
+Simple performance tests show that it's performance is slightly slower than Spring Remoting over HTTP, on average, by
+a few hundredth of a millisecond (on my machine).  
+Run `PerformanceComparison` to compare.
+
+### DynamicApiWithHttpRequestHandlerConfiguration
+
+Creates an HTTP API by using a `HttpRequestHandler`, which is the same mechanism Spring Remoting uses, when exposing
+a service through `HttpInvokerServiceExporter`.
+
+Simple performance tests show that it's performance is equivalent to Spring Remoting over HTTP, if not a bit faster on
+average, possibly due to simpler implementation.  
+Run `PerformanceComparison` to compare.
+
 ### StaticApiConfiguration
 
 Creates an HTTP API by using Spring MVC's functional endpoint configuration, for the same interface as used in
-`DynamicApiConfiguration`, but without using reflection. This could have been replaced with a class annotated with
-`@RestController`, but for comparison it is configured the same way as `DynamicApiConfiguration`.
+`DynamicApiWithRouterFunctionConfiguration`, but without using reflection. This could have been replaced with a class
+annotated with `@RestController`, but for comparison it is configured the same way as `DynamicApiConfiguration`.
+
+### SpringRemotingConfiguration
+
+Creates an HTTP API by using Spring Remoting's `HttpInvokerServiceExporter`, for comparison with other alternatives.
 
 ## Client-side
 
-### DynamicServiceFactory
+### DynamicWithRouterFunctionServiceFactory and DynamicWithHttpRequestHandlerServiceFactory
 
-Factory that creates a proxy for a remote service using Byte buddy, by specifying the remote interface. Each method of
+Factories that creates a proxy for a remote service using Byte buddy, by specifying the remote interface. Each method of
 the proxy calls the corresponding remote HTTP endpoint, RPC / RMI style. Details for invoking the remote method is added
-to
-the request body as a serialized Java-object, by using Java Object Serialization.
+to the request body as a serialized Java-object, by using Java Object Serialization.
 
-```java
-final DynamicServiceFactory dynamicServiceFactory = new DynamicServiceFactory("https://server-url.no");
-final RemoteService remoteService = dynamicServiceFactory.create(RemoteService.class);
+```
+final var factory = new DynamicWithHttpRequestHandlerServiceFactory("https://server-url.no");
+final RemoteService remoteService = factory.create(RemoteService.class);
 final SomeType result = remoteService.someMethod(someValue);
 ```
 
