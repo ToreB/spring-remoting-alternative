@@ -1,6 +1,6 @@
 # spring-remoting-alternative
 
-Simple alternative to Spring Remoting over HTTP.
+Simple alternatives to Spring Remoting over HTTP with HTTP Invoker.
 
 ## Server-side
 
@@ -51,7 +51,7 @@ final SomeType result = remoteService.someMethod(someValue);
 ### StaticService
 
 "Normal" implementation of a remote interface, where the HTTP-endpoints for the remote methods are explicitly called
-from each method of the interface, for comparison with the `DynamicServiceFactory`.
+from each method of the interface, for comparison with the dynamic proxy variants.
 
 ## Usage
 
