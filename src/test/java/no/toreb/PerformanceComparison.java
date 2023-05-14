@@ -19,7 +19,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
+
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Slf4j
 class PerformanceComparison implements CommandLineRunner {
@@ -66,24 +69,23 @@ class PerformanceComparison implements CommandLineRunner {
         final Map<String, CompletableFuture<Duration>> executions = new HashMap<>();
         for (int i = 0; i < iterations; i++) {
             final CompletableFuture<Duration> future1 =
-                    CompletableFuture.supplyAsync(() -> time(() -> staticService.exchange(dataObject), requests),
-                                                  executorService);
-            executions.put("Static (RouterFunction) " + i, future1);
-
+                    supplyAsync(testPerformance(() -> staticService.exchange(dataObject), requests),
+                                executorService);
+            executions.put("Static (RestController) " + i, future1);
             final CompletableFuture<Duration> future2 =
-                    CompletableFuture.supplyAsync(() -> time(() -> dynamic1Service.exchange(dataObject), requests),
-                                                  executorService);
+                    supplyAsync(testPerformance(() -> dynamic1Service.exchange(dataObject), requests),
+                                executorService);
             executions.put("Dynamic (RouterFunction) " + i, future2);
 
             final CompletableFuture<Duration> future3 =
-                    CompletableFuture.supplyAsync(() -> time(() -> springRemotingService.exchange(dataObject),
-                                                             requests),
-                                                  executorService);
+                    supplyAsync(testPerformance(() -> springRemotingService.exchange(dataObject),
+                                                requests),
+                                executorService);
             executions.put("Spring Remoting " + i, future3);
 
             final CompletableFuture<Duration> future4 =
-                    CompletableFuture.supplyAsync(() -> time(() -> dynamic2Service.exchange(dataObject), requests),
-                                                  executorService);
+                    supplyAsync(testPerformance(() -> dynamic2Service.exchange(dataObject), requests),
+                                executorService);
             executions.put("Dynamic (HttpRequestHandler) " + i, future4);
         }
 
@@ -107,6 +109,15 @@ class PerformanceComparison implements CommandLineRunner {
                                "Total %12.4f ms".formatted(millis),
                                "Average per request %10.4f ms".formatted(millis / requests));
                   });
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private Supplier<Duration> testPerformance(final Runnable function, final int requests) {
+        return () -> {
+            // Small warm-up before timing starts
+            IntStream.range(0, 10).forEach(i -> function.run());
+            return time(function, requests);
+        };
     }
 
     private static double toMillis(final Duration staticDuration) {

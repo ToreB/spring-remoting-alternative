@@ -25,11 +25,10 @@ Simple performance tests show that it's performance is equivalent to Spring Remo
 average, possibly due to simpler implementation.  
 Run `PerformanceComparison` to compare.
 
-### StaticApiConfiguration
+### StaticApiController
 
-Creates an HTTP API by using Spring MVC's functional endpoint configuration, for the same interface as used in
-`DynamicApiWithRouterFunctionConfiguration`, but without using reflection. This could have been replaced with a class
-annotated with `@RestController`, but for comparison it is configured the same way as `DynamicApiConfiguration`.
+Creates an HTTP API by using Spring MVC's `@RestController`-annotation, for the same interface as used in
+`DynamicApiWithRouterFunctionConfiguration`, but without using reflection. For comparison with other alternatives.
 
 ### SpringRemotingConfiguration
 
