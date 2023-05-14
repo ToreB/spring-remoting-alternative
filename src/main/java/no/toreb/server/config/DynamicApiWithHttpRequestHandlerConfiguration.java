@@ -1,5 +1,7 @@
 package no.toreb.server.config;
 
+import lombok.AllArgsConstructor;
+import lombok.Value;
 import no.toreb.common.RemoteMethodInvocation;
 import no.toreb.common.RemoteService;
 import org.springframework.context.annotation.Bean;
@@ -23,15 +25,16 @@ public class DynamicApiWithHttpRequestHandlerConfiguration {
 
     @Bean("/dynamic2/remoteService")
     HttpRequestHandler dynamicApiRequestHandler(final RemoteService service) {
-        final Map<String, Method> methods = getRemoteServiceMethods(service)
-                                                    .stream()
-                                                    .collect(Collectors.toMap(Method::getName, method -> method));
+        final Map<MethodKey, Method> methods = getRemoteServiceMethods(service)
+                                                       .stream()
+                                                       .collect(Collectors.toMap(MethodKey::new, method -> method));
         return (request, response) -> time("/dynamic2/remoteService", () -> {
             try {
                 final ServletInputStream bodyInputStream = request.getInputStream();
                 final RemoteMethodInvocation<?> methodInvocation = deserialize(bodyInputStream);
-                final Method method = methods.get(methodInvocation.getMethodName());
-                final Object invokeResult = method.invoke(service, methodInvocation.getMethodArguments());
+                final Method method = methods.get(new MethodKey(methodInvocation.getMethodName(),
+                                                                methodInvocation.getParameterTypes()));
+                final Object invokeResult = method.invoke(service, methodInvocation.getArguments());
 
                 response.setContentType(CONTENT_TYPE_VALUE);
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -43,5 +46,18 @@ public class DynamicApiWithHttpRequestHandlerConfiguration {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    @Value
+    @AllArgsConstructor
+    private static class MethodKey {
+
+        String name;
+        Class<?>[] parameterTypes;
+
+        MethodKey(final Method method) {
+            this.name = method.getName();
+            this.parameterTypes = method.getParameterTypes();
+        }
     }
 }

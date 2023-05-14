@@ -34,7 +34,7 @@ class PerformanceComparison implements CommandLineRunner {
     @Override
     public void run(final String... args) {
         final int requests = 10000;
-        final int requestsInParallel = 1;
+        final int simultaneousRequests = 1;
         final int iterations = 2;
 
         final String baseUrl = "http://localhost:8080";
@@ -60,7 +60,7 @@ class PerformanceComparison implements CommandLineRunner {
                                                                    .build())
                                                 .build();
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(requestsInParallel);
+        final ExecutorService executorService = Executors.newFixedThreadPool(simultaneousRequests);
 
         log.info("Starting executions.");
         final Map<String, CompletableFuture<Duration>> executions = new HashMap<>();
@@ -93,7 +93,8 @@ class PerformanceComparison implements CommandLineRunner {
         executorService.shutdown();
 
         log.info("");
-        log.info("Results with {} iterations per service, with {} parallel requests:", requests, requestsInParallel);
+        log.info("Results with {} iterations per service, with {} requests running simultaneously:",
+                 requests, simultaneousRequests);
         executions.entrySet()
                   .stream()
                   .map(entry -> Map.entry(entry.getKey(), entry.getValue().join()))

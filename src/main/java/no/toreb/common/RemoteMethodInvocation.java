@@ -11,5 +11,7 @@ public class RemoteMethodInvocation<T> implements Serializable {
 
     Class<T> returnType;
 
-    Object[] methodArguments;
+    Class<?>[] parameterTypes;
+
+    Object[] arguments;
 }

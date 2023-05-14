@@ -26,6 +26,7 @@ class DynamicApiWithRouterFunctionConfiguration {
         final List<Method> methods = getRemoteServiceMethods(service);
 
         final Builder route = route();
+        // Does not currently work with overloaded methods, due to same name.
         methods.forEach(method -> {
             route.POST("/dynamic/" + method.getName(), handle(method, service));
         });
@@ -37,7 +38,7 @@ class DynamicApiWithRouterFunctionConfiguration {
         return request -> time(request.path(), () -> {
             try {
                 final RemoteMethodInvocation<?> methodInvocation = deserializeBody(request);
-                final Object invokeResult = method.invoke(service, methodInvocation.getMethodArguments());
+                final Object invokeResult = method.invoke(service, methodInvocation.getArguments());
                 return serverResponse(invokeResult);
             } catch (final Exception e) {
                 throw new RuntimeException(e);

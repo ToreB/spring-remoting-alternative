@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 @UtilityClass
 class ApiUtils {
 
-    static final MediaType CONTENT_TYPE = new MediaType("application", "x-java-serialized-object");
+    private static final MediaType CONTENT_TYPE = new MediaType("application", "x-java-serialized-object");
     static final String CONTENT_TYPE_VALUE = "%s/%s".formatted(CONTENT_TYPE.getType(), CONTENT_TYPE.getSubtype());
 
     static <T> T time(final String name, final Supplier<T> supplier) {
@@ -58,7 +58,7 @@ class ApiUtils {
     static <T> RemoteMethodInvocation<T> deserializeBody(final ServerRequest request) throws Exception {
         final byte[] body = request.body(byte[].class);
         if (body.length == 0) {
-            return new RemoteMethodInvocation<>(null, null, new Object[0]);
+            return new RemoteMethodInvocation<>(null, null, new Class[0], new Object[0]);
         }
 
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body);

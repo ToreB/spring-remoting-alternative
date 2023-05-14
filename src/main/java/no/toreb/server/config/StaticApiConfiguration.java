@@ -27,7 +27,7 @@ class StaticApiConfiguration {
                       request -> time(request.path(), () -> {
                           try {
                               final RemoteMethodInvocation<Void> methodInvocation = deserializeBody(request);
-                              final Object[] methodArguments = methodInvocation.getMethodArguments();
+                              final Object[] methodArguments = methodInvocation.getArguments();
                               service.doSomething((String) methodArguments[0], (Boolean) methodArguments[1]);
                               return serverResponse(null);
                           } catch (final Exception e) {
@@ -38,7 +38,7 @@ class StaticApiConfiguration {
                       request -> time(request.path(), () -> {
                           try {
                               final RemoteMethodInvocation<DataObject> methodInvocation = deserializeBody(request);
-                              final Object[] methodArguments = methodInvocation.getMethodArguments();
+                              final Object[] methodArguments = methodInvocation.getArguments();
                               final DataObject result = service.exchange((DataObject) methodArguments[0]);
                               return serverResponse(result);
                           } catch (final Exception e) {

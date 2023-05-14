@@ -28,7 +28,10 @@ public class DynamicWithHttpRequestHandlerServiceFactory {
         @RuntimeType
         public Object intercept(@Origin final Method method,
                                 @AllArguments final Object[] args) {
-            return callRemote(new RemoteMethodInvocation<>(method.getName(), method.getReturnType(), args));
+            return callRemote(new RemoteMethodInvocation<>(method.getName(),
+                                                           method.getReturnType(),
+                                                           method.getParameterTypes(),
+                                                           args));
         }
 
         @Override
