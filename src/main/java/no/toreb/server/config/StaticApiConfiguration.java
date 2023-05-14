@@ -20,11 +20,11 @@ class StaticApiConfiguration {
     RouterFunction<ServerResponse> staticApiRouterFunction(final RemoteService service) {
         return route()
                 .POST("/static/hello",
-                      request -> time(request.path(), () -> serverResponse(service.hello())))
+                      request -> time("/static/hello", () -> serverResponse(service.hello())))
                 .POST("/static/bye",
-                      request -> time(request.path(), () -> serverResponse(service.bye())))
+                      request -> time("/static/bye", () -> serverResponse(service.bye())))
                 .POST("/static/doSomething",
-                      request -> time(request.path(), () -> {
+                      request -> time("/static/doSomething", () -> {
                           try {
                               final RemoteMethodInvocation<Void> methodInvocation = deserializeBody(request);
                               final Object[] methodArguments = methodInvocation.getArguments();
@@ -35,11 +35,11 @@ class StaticApiConfiguration {
                           }
                       }))
                 .POST("/static/exchange",
-                      request -> time(request.path(), () -> {
+                      request -> time("/static/exchange", () -> {
                           try {
                               final RemoteMethodInvocation<DataObject> methodInvocation = deserializeBody(request);
-                              final Object[] methodArguments = methodInvocation.getArguments();
-                              final DataObject result = service.exchange((DataObject) methodArguments[0]);
+                              final DataObject result =
+                                      service.exchange((DataObject) methodInvocation.getArguments()[0]);
                               return serverResponse(result);
                           } catch (final Exception e) {
                               throw new RuntimeException(e);
