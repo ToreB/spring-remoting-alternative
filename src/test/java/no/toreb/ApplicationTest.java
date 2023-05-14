@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
-        classes = Application.class)
+                classes = Application.class)
 class ApplicationTest {
 
     private RemoteService staticService;

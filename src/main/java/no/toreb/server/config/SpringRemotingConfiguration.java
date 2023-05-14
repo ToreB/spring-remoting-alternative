@@ -18,7 +18,7 @@ public class SpringRemotingConfiguration {
         final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
         exporter.setService(remoteService);
         exporter.setServiceInterface(RemoteService.class);
-        exporter.setInterceptors(new Object[]{new TimingInterceptor()});
+        exporter.setInterceptors(new Object[] {new TimingInterceptor()});
         return exporter;
     }
 

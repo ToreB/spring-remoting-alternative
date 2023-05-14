@@ -108,7 +108,8 @@ class AbstractRemoteService {
         }
 
         final ObjectInputStream ois = new ObjectInputStream(httpEntity.getContent());
-        @SuppressWarnings("unchecked") final T result = (T) ois.readObject();
+        @SuppressWarnings("unchecked")
+        final T result = (T) ois.readObject();
         ois.close();
         return result;
     }

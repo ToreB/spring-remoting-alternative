@@ -27,11 +27,11 @@ public class StaticService extends AbstractRemoteService implements RemoteServic
 
     @Override
     public void doSomething(final String param1, final boolean param2) {
-        callRemote(new RemoteMethodInvocation<>("doSomething", String.class, new Object[]{param1, param2}));
+        callRemote(new RemoteMethodInvocation<>("doSomething", String.class, new Object[] {param1, param2}));
     }
 
     @Override
     public DataObject exchange(final DataObject dataObject) {
-        return callRemote(new RemoteMethodInvocation<>("exchange", DataObject.class, new Object[]{dataObject}));
+        return callRemote(new RemoteMethodInvocation<>("exchange", DataObject.class, new Object[] {dataObject}));
     }
 }
