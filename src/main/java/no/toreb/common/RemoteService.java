@@ -9,4 +9,6 @@ public interface RemoteService {
     void doSomething(String param1, boolean param2);
 
     DataObject exchange(DataObject dataObject);
+
+    Object getSomething();
 }

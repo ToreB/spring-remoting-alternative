@@ -40,4 +40,12 @@ public class StaticService extends AbstractRemoteService implements RemoteServic
                                                        new Class[] {DataObject.class},
                                                        new Object[] {dataObject}));
     }
+
+    @Override
+    public Object getSomething() {
+        return callRemote(new RemoteMethodInvocation<Object>("getSomething",
+                                                             Object.class,
+                                                             new Class[0],
+                                                             new Object[0]));
+    }
 }

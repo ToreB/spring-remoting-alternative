@@ -1,19 +1,18 @@
 package no.toreb.server.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import no.toreb.common.RemoteMethodInvocation;
+import no.toreb.common.RemoteMethodResult;
 import no.toreb.common.RemoteService;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -28,6 +27,8 @@ class ApiUtils {
     private static final MediaType CONTENT_TYPE = new MediaType("application", "x-java-serialized-object");
     static final String CONTENT_TYPE_VALUE = "%s/%s".formatted(CONTENT_TYPE.getType(), CONTENT_TYPE.getSubtype());
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     static <T> T time(final String name, final Callable<T> callable) {
         final long start = System.nanoTime();
         try {
@@ -41,17 +42,17 @@ class ApiUtils {
     }
 
     static byte[] serialize(final Object object) {
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        serialize(object, byteArrayOutputStream);
-        return byteArrayOutputStream.toByteArray();
+        try {
+            final byte[] objectBytes = objectMapper.writeValueAsBytes(object);
+            return objectMapper.writeValueAsBytes(new RemoteMethodResult(object.getClass(), objectBytes));
+        } catch (final JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     static void serialize(final Object object, final OutputStream outputStream) {
         try {
-            final ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(object);
-            objectOutputStream.flush();
-            objectOutputStream.close();
+            outputStream.write(serialize(object));
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,16 +64,13 @@ class ApiUtils {
             return new RemoteMethodInvocation<>(null, null, new Class[0], new Object[0]);
         }
 
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body);
-        return deserialize(byteArrayInputStream);
+        //noinspection unchecked
+        return objectMapper.readValue(body, RemoteMethodInvocation.class);
     }
 
     static <T> RemoteMethodInvocation<T> deserialize(final InputStream inputStream) throws Exception {
-        final ObjectInputStream ois = new ObjectInputStream(inputStream);
-        @SuppressWarnings("unchecked")
-        final RemoteMethodInvocation<T> result = (RemoteMethodInvocation<T>) ois.readObject();
-        ois.close();
-        return result;
+        //noinspection unchecked
+        return objectMapper.readValue(inputStream, RemoteMethodInvocation.class);
     }
 
     static List<Method> getRemoteServiceMethods(final RemoteService service) {

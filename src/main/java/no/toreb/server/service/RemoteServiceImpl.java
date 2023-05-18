@@ -2,8 +2,11 @@ package no.toreb.server.service;
 
 import lombok.extern.slf4j.Slf4j;
 import no.toreb.common.DataObject;
+import no.toreb.common.DataObject2;
 import no.toreb.common.RemoteService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -30,5 +33,13 @@ public class RemoteServiceImpl implements RemoteService {
         return dataObject.toBuilder()
                          .field3(!dataObject.getField3())
                          .build();
+    }
+
+    @Override
+    public Object getSomething() {
+        return DataObject2.builder()
+                          .field1("value1")
+                          .strings(List.of("s1", "s2", "s3"))
+                          .build();
     }
 }

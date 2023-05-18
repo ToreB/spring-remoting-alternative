@@ -49,4 +49,12 @@ public class StaticApiController {
             return serialize(result);
         });
     }
+
+    @PostMapping("/getSomething")
+    Object getSomething() {
+        return time("/static/getSomething", () -> {
+            final Object result = service.getSomething();
+            return serialize(result);
+        });
+    }
 }

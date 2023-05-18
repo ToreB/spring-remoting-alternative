@@ -1,6 +1,8 @@
 package no.toreb.client.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.toreb.common.RemoteMethodInvocation;
+import no.toreb.common.RemoteMethodResult;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -18,9 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
@@ -39,6 +38,8 @@ class AbstractRemoteService {
     private final RequestConfig requestConfig;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     protected AbstractRemoteService(final String baseUrl) {
         this.baseUrl = baseUrl;
@@ -96,14 +97,7 @@ class AbstractRemoteService {
     }
 
     private byte[] serialize(final RemoteMethodInvocation<?> remoteMethodInvocation) throws Exception {
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-
-        objectOutputStream.writeObject(remoteMethodInvocation);
-        objectOutputStream.flush();
-        objectOutputStream.close();
-
-        return byteArrayOutputStream.toByteArray();
+        return objectMapper.writeValueAsBytes(remoteMethodInvocation);
     }
 
     private <T> T deserialize(final HttpEntity httpEntity) throws Exception {
@@ -111,10 +105,9 @@ class AbstractRemoteService {
             return null;
         }
 
-        final ObjectInputStream ois = new ObjectInputStream(httpEntity.getContent());
-        @SuppressWarnings("unchecked")
-        final T result = (T) ois.readObject();
-        ois.close();
-        return result;
+        final RemoteMethodResult remoteMethodResult = objectMapper.readValue(httpEntity.getContent(),
+                                                                             RemoteMethodResult.class);
+        //noinspection unchecked
+        return (T) objectMapper.readValue(remoteMethodResult.getValue(), remoteMethodResult.getType());
     }
 }

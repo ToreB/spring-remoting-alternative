@@ -66,21 +66,25 @@ class ApplicationTest {
         final String staticBye = staticService.bye();
         staticService.doSomething("value1", true);
         final DataObject staticExchange = staticService.exchange(dataObject);
+        final Object staticGetSomething = staticService.getSomething();
 
         final String dynamic1Hello = dynamic1Service.hello();
         final String dynamic1Bye = dynamic1Service.bye();
         dynamic1Service.doSomething("value2", false);
         final DataObject dynamic1Exchange = dynamic1Service.exchange(dataObject);
+        final Object dynamic1GetSomething = dynamic1Service.getSomething();
 
         final String remotingHello = springRemotingService.hello();
         final String remotingBye = springRemotingService.bye();
         springRemotingService.doSomething("value3", true);
         final DataObject remotingExchange = springRemotingService.exchange(dataObject);
+        final Object remotingGetSomething = springRemotingService.getSomething();
 
         final String dynamic2Hello = dynamic2Service.hello();
         final String dynamic2Bye = dynamic2Service.bye();
         dynamic2Service.doSomething("value2", false);
         final DataObject dynamic2Exchange = dynamic2Service.exchange(dataObject);
+        final Object dynamic2GetSomething = dynamic2Service.getSomething();
 
         assertThat(staticHello)
                 .isEqualTo(dynamic1Hello)
@@ -97,5 +101,10 @@ class ApplicationTest {
                 .isEqualTo(remotingExchange)
                 .isEqualTo(dynamic2Exchange)
                 .isEqualTo(dataObject.toBuilder().field3(false).build());
+        assertThat(staticGetSomething)
+                .isEqualTo(dynamic1GetSomething)
+                .isEqualTo(remotingGetSomething)
+                .isEqualTo(dynamic2GetSomething)
+                .isEqualTo(DataObject2.builder().field1("value1").strings(List.of("s1", "s2", "s3")).build());
     }
 }
